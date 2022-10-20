@@ -66,7 +66,7 @@ THE SOFTWARE.
  *                  9600    19200   38400
  *                  57600   115200  230400
  */
-
+#define _POSIX_C_SOURCE 200112L
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -78,6 +78,7 @@ THE SOFTWARE.
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/socket.h>
+#include <sys/select.h>
 #include <ctype.h>
 #include <unistd.h>
 
@@ -169,7 +170,7 @@ void set_raw_tty_mode(int fd)
 			ECHO |     /* disable character echo */
 			ECHOE |    /* disable visual erase */
 			ECHOK |    /* disable echo newline after kill */
-			ECHOKE |   /* disable visual kill with bs-sp-bs */
+			//ECHOKE |   /* disable visual kill with bs-sp-bs */
 			ECHONL |   /* disable echo nl when echo off */
 			ISIG | 	   /* disable tty-generated signals */
 			IEXTEN);   /* disable extended input processing */
@@ -224,7 +225,7 @@ void set_tty_speed(int fd, speed_t new_ispeed, speed_t new_ospeed)
       exit(1);
     }
 
-  ttymodes.c_cflag |= CRTSCTS;     /* enable RTS/CTS flow control */
+  //ttymodes.c_cflag |= CRTSCTS;     /* enable RTS/CTS flow control */
 
   /* Apply hanges */
 
@@ -265,7 +266,7 @@ void set_tbh_size(unsigned char buf[], int size)
 
 void tbh_write(int fd, unsigned char buf[], int buffsize)
 {
-  char header_buf[TBHSIZE];
+  unsigned char header_buf[TBHSIZE];
 
   Debug1("tbh_write: send message of size %d\r\n", buffsize);
 
@@ -608,7 +609,7 @@ int main(int argc, char *argv[])
 		    Debug("received OPEN ");
 		    /* Terminate string */
 		    buf[nr_read] = '\0';
-		    strcpy(ttyname,&buf[HEADERSIZE]);
+		    strcpy(ttyname,(const char*)&buf[HEADERSIZE]);
 
 		  open:
 		    Debug1("opening %s \r\n",ttyname);
@@ -643,7 +644,7 @@ int main(int argc, char *argv[])
 		    {
 		      int off;
  
-		      in_speed = get_speed(atoi(&buf[HEADERSIZE]));
+		      in_speed = get_speed(atoi((const char*)&buf[HEADERSIZE]));
 
 		      /* Null-terminate string */
 		      buf[nr_read] = '\0';
@@ -653,7 +654,7 @@ int main(int argc, char *argv[])
 			  isdigit(buf[off]) && (off < MAXLENGTH) ;
 			  off += 1);
 
-		      out_speed = get_speed(atoi(&buf[off]));
+		      out_speed = get_speed(atoi((const char*)&buf[off]));
 
 		      Debug1("     raw SPEED %s\r\n",&buf[HEADERSIZE]);
 		      Debug2("received SPEED %ud %ud\r\n",
