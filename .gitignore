@@ -1,3 +1,5 @@
 ebin/*.beam
-priv/bin/serial
+priv/
 c_src/*.o
+*.swp
+c_src/serial
