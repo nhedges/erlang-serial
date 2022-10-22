@@ -84,11 +84,11 @@ handle_info({Port, {data, Bytes}}, #state{port=Port,
                                           owner_pid=Owner,
                                           scan_index=Idx,
                                           message_delimiter=Pattern}=State) ->
-  ExpandedBuf = <<Buf/binary, Bytes>>,
+  ExpandedBuf = <<Buf/binary, Bytes/binary>>,
   case match_message(ExpandedBuf, Idx, Pattern) of
     {[], NewBuf, NewIdx} ->
       {noreply, State#state{data_buffer=NewBuf, scan_index=NewIdx}};
-    {[Messages], NewBuf, NewIdx} ->
+    {Messages, NewBuf, NewIdx} ->
       lists:foreach(fun(Msg) ->
                         Owner ! {serial_rx_data, Msg}
                     end,
