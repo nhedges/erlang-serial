@@ -33,7 +33,7 @@
 % gen_server callbacks
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2]).
 
--export([start_link/1]).
+-export([start_link/1, send/2]).
 
 -ifdef(TEST).
 -export([match_message/3]).
@@ -59,6 +59,10 @@ priv_dir() ->
 -spec start_link(Options::[tuple()]) -> {ok, pid()}.
 start_link(Options) ->
   gen_server:start_link({local, ?MODULE}, ?MODULE, [self(), Options], []).
+
+-spec send(Pid::pid(), Message::binary()) -> ok|{error,_}.
+send(Pid, Message) ->
+  gen_server:cast(Pid, {send, Message}).
 
 init([OwnerPid, Options]) ->
   process_flag(trap_exit,true),
