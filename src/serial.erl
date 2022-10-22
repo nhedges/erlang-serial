@@ -60,10 +60,10 @@ priv_dir() ->
 start_link(Options) ->
   gen_server:start_link({local, ?MODULE}, ?MODULE, [self(), Options], []).
 
-init([OwnerPid, _Options]) ->
+init([OwnerPid, Options]) ->
   process_flag(trap_exit,true),
   Port = open_port({spawn,priv_dir()++"/bin/serial -erlang"},[binary,{packet,2}]),
-  {ok, #state{owner_pid=OwnerPid, port=Port}}.
+  {ok, handle_options(Options, #state{owner_pid=OwnerPid, port=Port})}.
 
 handle_options([], State) ->
   State;
